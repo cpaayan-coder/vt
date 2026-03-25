@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Status - VTELECTRICKON</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
+    .navbar-brand span { color: #f59e0b; }
+    .status-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 40px; max-width: 480px; margin: 60px auto; text-align: center; }
+    .step { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f1f5f9; text-align: left; }
+    .step:last-child { border-bottom: none; }
+    .step-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .step-active { background: #dcfce7; }
+    .step-inactive { background: #f1f5f9; }
+    .step-label { font-weight: 600; font-size: 0.95rem; }
+    .step-sublabel { font-size: 0.8rem; color: #64748b; }
+    footer { background: #0f172a; color: #94a3b8; padding: 24px 0; margin-top: 60px; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark" style="background:#0f172a;">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="/">⚡ VT<span>ELECTRICKON</span></a>
+  </div>
+</nav>
+
+<div class="container">
+  {% if not order %}
+  <div class="status-card">
+    <div style="font-size:3rem;">❓</div>
+    <h4 class="fw-bold mt-3">Order Not Found</h4>
+    <p class="text-muted">Order #{{ order_id }} could not be found. Please check your order ID.</p>
+    <a href="/" class="btn mt-2" style="background:#0f172a;color:#fff;border-radius:8px;padding:10px 24px;font-weight:600;">Back to Store</a>
+  </div>
+  {% else %}
+  <div class="status-card">
+    <div class="text-muted mb-1" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px;">Order #{{ order[0] }}</div>
+    <h4 class="fw-bold mb-1">{{ order[1] }}</h4>
+    <div class="text-muted mb-4" style="font-size:0.875rem;">Placed on {{ order[5] }}</div>
+
+    {% if order[4] == 'done' %}
+    <!-- Order Done -->
+    <div style="background:#dcfce7;border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="font-size:2.5rem;">🎉</div>
+      <div class="fw-bold mt-2" style="color:#166534;font-size:1.1rem;">Order Taken!</div>
+      <div style="color:#16a34a;font-size:0.875rem;margin-top:4px;">Your order has been confirmed and is on its way.</div>
+    </div>
+    {% else %}
+    <!-- Order Pending -->
+    <div style="background:#fef9c3;border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="font-size:2.5rem;">⏳</div>
+      <div class="fw-bold mt-2" style="color:#854d0e;font-size:1.1rem;">Order Pending</div>
+      <div style="color:#a16207;font-size:0.875rem;margin-top:4px;">We've received your order and are processing it.</div>
+    </div>
+    {% endif %}
+
+    <!-- Status Steps -->
+    <div class="mb-4">
+      <div class="step">
+        <div class="step-icon step-active">✅</div>
+        <div>
+          <div class="step-label">Order Placed</div>
+          <div class="step-sublabel">{{ order[5] }}</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon {% if order[4] == 'done' %}step-active{% else %}step-inactive{% endif %}">
+          {% if order[4] == 'done' %}✅{% else %}📦{% endif %}
+        </div>
+        <div>
+          <div class="step-label">Order Confirmed</div>
+          <div class="step-sublabel">{% if order[4] == 'done' %}Your order has been taken{% else %}Awaiting confirmation{% endif %}</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon step-inactive">🚚</div>
+        <div>
+          <div class="step-label">Out for Delivery</div>
+          <div class="step-sublabel">Coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f8fafc;border-radius:10px;padding:14px 18px;text-align:left;margin-bottom:20px;">
+      <div class="d-flex justify-content-between mb-1">
+        <span class="text-muted" style="font-size:0.85rem;">Total</span>
+        <span class="fw-bold">₹{{ "%.0f"|format(order[2]) }}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span class="text-muted" style="font-size:0.85rem;">Payment</span>
+        <span class="fw-semibold">{{ order[3] }}</span>
+      </div>
+    </div>
+
+    <button onclick="location.reload()" class="btn w-100 mb-2" style="background:#0f172a;color:#fff;border-radius:8px;padding:11px;font-weight:600;">
+      <i class="bi bi-arrow-clockwise me-2"></i>Refresh Status
+    </button>
+    <a href="/" class="btn w-100" style="background:#f1f5f9;color:#0f172a;border-radius:8px;padding:11px;font-weight:600;">
+      Back to Store
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<footer class="text-center">
+  <div class="container">
+    <div class="fw-semibold text-white mb-1">⚡ VTELECTRICKON</div>
+    <div>Your trusted electronics partner &mdash; &copy; 2025</div>
+  </div>
+</footer>
+</body>
+</html>
