@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - VTELECTRICKON</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .payment-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; max-width: 400px; width: 100%; }
+        .amount { font-size: 2rem; font-weight: 700; color: #0f172a; margin: 20px 0; }
+        .btn-pay { background: #0f172a; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 1.1rem; width: 100%; transition: background 0.2s; }
+        .btn-pay:hover { background: #1e3a5f; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="payment-card">
+    <h4 class="fw-bold mb-3">Secure Payment</h4>
+    <p class="text-muted mb-0">Order #{{ order_id }}</p>
+    <div class="amount">₹{{ "%.0f"|format(amount) }}</div>
+    <p class="text-muted mb-4" style="font-size:0.9rem;">Please complete your payment using Razorpay (UPI, Cards, NetBanking)</p>
+    <button id="rzp-button1" class="btn-pay">Pay Now</button>
+</div>
+
+<!-- Hidden form to submit to our server after successful payment -->
+<form id="payment-success-form" action="/payment/success" method="POST" style="display: none;">
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+    <input type="hidden" name="db_order_id" value="{{ order_id }}">
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ key_id }}",
+    "amount": "{{ amount * 100 }}", 
+    "currency": "INR",
+    "name": "VTELECTRICKON",
+    "description": "Order #{{ order_id }}",
+    "order_id": "{{ rzp_order_id }}",
+    "handler": function (response){
+        // Populate and submit form to our backend for verification
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+        document.getElementById('payment-success-form').submit();
+    },
+    "prefill": {
+        "name": "{{ customer_name }}",
+        "contact": "{{ customer_phone }}"
+    },
+    "theme": {
+        "color": "#0f172a"
+    }
+};
+var rzp1 = new Razorpay(options);
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+
+// Automatically open on load
+window.onload = function() {
+    rzp1.open();
+};
+</script>
+
+</body>
+</html>

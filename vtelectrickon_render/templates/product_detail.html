@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ product[1] }} - VTELECTRICKON</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-dark: #0f172a;
+      --accent-gold: #f59e0b;
+      --bg-light: #f8fafc;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg-light); color: #1e293b; }
+    
+    .navbar { background: var(--primary-dark); padding: 1rem 0; }
+    .navbar-brand img { height: 48px; border-radius: 8px; background: #fff; padding: 4px; }
+
+    .product-container { margin-top: 4rem; margin-bottom: 4rem; }
+    .product-image-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+    }
+    .product-image-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    .brand-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: #e2e8f0;
+      color: #64748b;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+    .product-title { font-size: 2.5rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem; }
+    .category-text { color: #94a3b8; font-weight: 500; margin-bottom: 2rem; display: block; }
+    
+    .price-display { font-size: 2.5rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 2rem; }
+    .price-display span { font-size: 1.5rem; vertical-align: super; margin-right: 4px; }
+
+    .variant-selector { margin-bottom: 2rem; }
+    .variant-label { font-weight: 600; margin-bottom: 0.75rem; color: #64748b; }
+    .variant-options { display: flex; gap: 12px; flex-wrap: wrap; }
+    .variant-btn {
+      border: 2px solid #e2e8f0;
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .variant-btn:hover { border-color: var(--accent-gold); }
+    .variant-btn.active { border-color: var(--accent-gold); background: #fffcf0; color: var(--accent-gold); }
+
+    .description-box { margin-bottom: 2.5rem; line-height: 1.7; color: #475569; }
+    
+    .action-btns { display: flex; gap: 1rem; }
+    .btn-cart {
+      background: var(--primary-dark);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 32px;
+      font-weight: 700;
+      font-size: 1.125rem;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: 0.3s;
+    }
+    .btn-cart:hover { background: #1e3a8a; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(15,23,42,0.15); }
+
+    footer { background: var(--primary-dark); color: #94a3b8; padding: 4rem 0 2rem; margin-top: 4rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <img src="{{ url_for('static', filename='images/company_logo.jpg') }}" alt="VTELECTRICKON">
+    </a>
+    <a href="/cart" class="btn btn-warning rounded-pill px-4 fw-bold">
+      <i class="bi bi-cart3"></i> Cart
+      {% if session.get('cart') %}
+      <span class="ms-1 px-2 py-0.5 bg-danger text-white rounded-pill" style="font-size:0.7rem;">{{ session.get('cart')|length }}</span>
+      {% endif %}
+    </a>
+  </div>
+</nav>
+
+<div class="container product-container">
+  <div class="row g-5">
+    <div class="col-lg-6">
+      <div class="product-image-card">
+        <img id="mainImage" src="{{ url_for('static', filename='images/' + product[5]) }}" alt="{{ product[1] }}">
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="brand-badge">{{ product[2] }}</div>
+      <h1 class="product-title">{{ product[1] }}</h1>
+      <span class="category-text">Category: {{ product[6] }}</span>
+      
+      <div class="price-display">
+        <span>₹</span><span id="priceDisplay">{{ "%.0f"|format(product[3]) }}</span>
+      </div>
+
+      {% if variants %}
+      <div class="variant-selector">
+        <div class="variant-label">SELECT VERSION</div>
+        <div class="variant-options">
+          {% for v in variants %}
+          <div class="variant-btn {% if loop.first %}active{% endif %}" 
+               onclick="selectVariant(this, '{{ v.name }}', {{ v.price }}, '{{ v.image }}')">
+            {{ v.name }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="description-box">
+        <h5 class="fw-bold mb-3 text-dark">Product Description</h5>
+        <p>{{ product[7] or "No description available for this product." }}</p>
+      </div>
+
+      <div class="action-btns">
+        {% if product[4] > 0 %}
+        <a href="/add_to_cart/{{ product[0] }}" class="btn-cart">
+          <i class="bi bi-cart-plus"></i> Add to Cart
+        </a>
+        {% else %}
+        <button class="btn btn-secondary w-100 py-3 rounded-4 fw-bold" disabled>Out of Stock</button>
+        {% endif %}
+      </div>
+      
+      <div class="mt-4 p-3 bg-white rounded-4 border border-light-subtle d-flex align-items-center gap-3">
+        <i class="bi bi-shield-check fs-3 text-success"></i>
+        <div>
+          <div class="fw-bold small">Authentic Product</div>
+          <div class="small text-muted">100% Genuine product from authorized brands.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="text-center">
+  <div class="container">
+    <div class="h4 fw-bold text-white mb-3">⚡ VTELECTRICKON</div>
+    <div class="border-top border-secondary pt-4 mt-4 small">
+      &copy; 2025 VTELECTRICKON Solutions Pvt Ltd. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+function selectVariant(el, name, price, image) {
+  // Update UI buttons
+  document.querySelectorAll('.variant-btn').forEach(btn => btn.classList.remove('active'));
+  el.classList.add('active');
+  
+  // Update Price
+  document.getElementById('priceDisplay').textContent = price.toLocaleString();
+  
+  // Update Image (only if image filename is provided)
+  if (image) {
+    document.getElementById('mainImage').src = "/static/images/" + image;
+  }
+}
+</script>
+
+</body>
+</html>
